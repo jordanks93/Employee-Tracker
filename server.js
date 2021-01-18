@@ -30,27 +30,37 @@ function startQuery() {
   inquirer.prompt({
     name: "action",
     type: "list",
-    message: "View the database or create a new department, role, or employee.",
-    choices: ["View the database", "Add new department", "Add new role", "Add new employee", "Quit"]
+    message: "View the database, Create a new: department, role, or employee, and/or Update an employee's role",
+    choices:
+      [
+        "View the database",
+        "Add new department",
+        "Add new role",
+        "Add new employee",
+        "Update an employee's role",
+        "Quit"
+      ]
+  }).then((answer) => {
+    if (answer.action === "View the database") {
+      viewDB();
+    }
+    else if (answer.action === "Add new department") {
+      addDepartment();
+    }
+    else if (answer.action === "Add new role") {
+      addRole();
+    }
+    else if (answer.action === "Add new employee") {
+      addEmployee();
+    }
+    else if (answer.action === "Update an employee's role") {
+      updateEmployeeRole();
+    }
+    else {
+      console.log("Quit Application");
+      connection.end();
+    }
   })
-    .then((answer) => {
-      if (answer.action === "View the database") {
-        viewDB();
-      }
-      else if (answer.action === "Add new department") {
-        addDepartment();
-      }
-      else if (answer.action === "Add new role") {
-        addRole();
-      }
-      else if (answer.action === "Add new employee") {
-        addEmployee();
-      }
-      else {
-        console.log("Quit Application");
-        connection.end();
-      }
-    })
 }
 
 // prompts user for the table they want to view in the database
@@ -111,4 +121,109 @@ function viewEmployees() {
     startQuery();
   })
 };
+
+//function to add department
+function addDepartment() {
+  inquirer.prompt([
+    {
+      name: "department",
+      type: "input",
+      message: "What is the name of the new department?",
+    }
+  ]).then((answer) => {
+
+      // inserts department data into table
+      connection.query("INSERT INTO department SET ?",
+        {
+          name: answer.department
+        },
+        function (err) {
+          if (err) throw err;
+          console.log("Department Added Successfully!");
+          startQuery();
+        }
+      );
+    });
+}
+
+// prompts user for new role info and adds it to the database
+function addRole() {
+  inquirer.prompt([
+    {
+      name: "title",
+      type: "input",
+      message: "What role title are you adding?",
+    },
+    {
+      name: "salary",
+      type: "input",
+      message: "What is the salary for this position?",
+    },
+    {
+      name: "departmentID",
+      type: "input",
+      message: "What is the department ID of this role?",
+    }
+  ]).then((answers) => {
+
+    // inserts role data into table
+    connection.query(
+      "INSERT INTO role SET ?",
+      {
+        title: answers.title,
+        salary: answers.salary,
+        department_id: answers.departmentID
+      },
+      function (err) {
+        if (err) throw err;
+        console.log("Role Added Successfully!");
+        startQuery();
+      }
+    );
+  });
+}
+
+// prompts user for new employee info and adds it to the database
+function addEmployee() {
+  inquirer.prompt([
+    {
+      name: "firstName",
+      type: "input",
+      message: "Enter the employee's first name:",
+    },
+    {
+      name: "lastName",
+      type: "input",
+      message: "Enter the employee's last name:",
+    },
+    {
+      name: "roleID",
+      type: "input",
+      message: "Enter the employee's roleID:"
+    },
+    {
+      name: "managerID",
+      type: "input",
+      message: "Enter the employee's managerID:",
+    }
+  ]).then((answers) => {
+
+      // inserts employee data into table
+      connection.query("INSERT INTO employee SET ?",
+        {
+          first_name: answers.firstName,
+          last_name: answers.lastName,
+          role_id: answers.roleID,
+          manager_id: answers.managerID
+        },
+        function (err) {
+          if (err) throw err;
+          console.log("Employee Added Successfully!");
+          //takes user back to inital prompt
+          startQuery();
+        }
+      );
+    });
+}
+
 
