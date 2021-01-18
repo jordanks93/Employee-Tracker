@@ -41,6 +41,7 @@ function startQuery() {
         "Quit"
       ]
   }).then((answer) => {
+
     if (answer.action === "View the database") {
       viewDB();
     }
@@ -70,7 +71,7 @@ function viewDB() {
     name: "table",
     type: "list",
     message: "Which table in the database would you like to view?",
-    choices: ["Department", "Role", "Employee", "Create/Quit"]
+    choices: ["Department", "Role", "Employee", "Back to start/Quit"]
 
   }).then((answers) => {
 
@@ -140,6 +141,7 @@ function addDepartment() {
         function (err) {
           if (err) throw err;
           console.log("Department Added Successfully!");
+          //takes user back to inital prompt
           startQuery();
         }
       );
@@ -167,8 +169,7 @@ function addRole() {
   ]).then((answers) => {
 
     // inserts role data into table
-    connection.query(
-      "INSERT INTO role SET ?",
+    connection.query("INSERT INTO role SET ?",
       {
         title: answers.title,
         salary: answers.salary,
@@ -177,6 +178,7 @@ function addRole() {
       function (err) {
         if (err) throw err;
         console.log("Role Added Successfully!");
+        //takes user back to inital prompt
         startQuery();
       }
     );
@@ -226,4 +228,28 @@ function addEmployee() {
     });
 }
 
+// prompts user for employee's new role id and updates the database
+function updateEmployeeRole() {
+  inquirer.prompt([
+    {
+      name: "employeeID",
+      type: "input",
+      message: "Enter the employee ID you want to update:"
+    },
+    {
+      name: "newRoleID",
+      type: "input",
+      message: "Enter the employees new role ID:"
+    }
+  ]).then((answers) => {
+    let query = "UPDATE employee SET role_id = " + answers.newRoleID  + " WHERE id = " + answers.employeeID;
+    connection.query(query, (err) => {
+        if (err) throw err;
+        console.log("Employee Role Updated Successfully!");
+        //takes user back to inital prompt
+        startQuery();
+      }
+    );
+  });
+}
 
